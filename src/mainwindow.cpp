@@ -1,8 +1,10 @@
 #include "mainwindow.h"
+#include "chatmodel.h"
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
+#include <QListWidgetItem>
 #include <QPushButton>
 #include <QSplitter>
 #include <QTextEdit>
@@ -13,17 +15,19 @@ MainWindow::MainWindow(QWidget *parent) : QWidget{parent} {
     resize(800, 600);
 
     // Начальные данные.
-    m_messagesByChat["Анна"] << "Привет!" << "Как дела?";
-    m_messagesByChat["Борис"] << "Созвон в 15:00";
-    m_messagesByChat["Виктор"] << "Файлы отправил";
+    m_chatModel = new ChatModel(this);
+    m_chatModel->addChat("Ирина");
+    m_chatModel->addChat("Витя");
+    m_chatModel->addChat("Алексей");
+    m_chatModel->addMessage("Ирина", "Привет!");
+    m_chatModel->addMessage("Витя", "Занят?");
+    m_chatModel->addMessage("Алексей", "Я скоро буду.");
 
     QSplitter *splitter = new QSplitter(this);
 
-    // Левая панель (чаты).
+    // Левая панель.
     m_chatList = new QListWidget();
-    m_chatList->addItem("Анна");
-    m_chatList->addItem("Борис");
-    m_chatList->addItem("Виктор");
+    updateChats();
 
     // Правая панель (чат).
     QWidget     *chatWidget = new QWidget();
@@ -59,7 +63,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget{parent} {
 }
 
 void MainWindow::onSendBtnClicked() {
-    if (m_currentChat.isEmpty())
+    if (!m_chatModel || m_currentChat.isEmpty())
         return;
 
     QString message = m_messageInput->text().trimmed();
@@ -68,20 +72,27 @@ void MainWindow::onSendBtnClicked() {
         return;
 
     m_messagesView->append(message);
-    m_messagesByChat[m_currentChat].append(message);
+    m_chatModel->addMessage(m_currentChat, message);
     m_messageInput->clear();
 }
 
 void MainWindow::onChatClicked(QListWidgetItem *item, QListWidgetItem * /*previous*/) {
-    if (!item)
+    if (!m_chatModel || !item)
         return;
 
     m_chatTitle->setText(item->text());
     m_currentChat = item->text();
 
     m_messagesView->clear();
-    const QStringList &messages = m_messagesByChat.value(m_currentChat);
-    for (const QString &msg : messages) {
+    for (const QString &msg : m_chatModel->messages(m_currentChat)) {
         m_messagesView->append(msg);
+    }
+}
+
+void MainWindow::updateChats() {
+    m_chatList->clear();
+
+    for (const QString &chatName : m_chatModel->chats()) {
+        m_chatList->addItem(chatName);
     }
 }

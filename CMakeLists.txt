@@ -11,6 +11,10 @@ qt_add_executable(TelegramClone
     src/main.cpp
     src/mainwindow.h src/mainwindow.cpp
     .clang-format
+    src/chatmodel.h src/chatmodel.cpp
+
+
+
 
 )
 
