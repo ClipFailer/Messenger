@@ -9,9 +9,10 @@ qt_standard_project_setup()
 qt_add_executable(TelegramClone
     WIN32 MACOSX_BUNDLE
     src/main.cpp
-    src/mainwindow.h src/mainwindow.cpp
+    src/MainWindow.h src/MainWindow.cpp
     .clang-format
-    src/chatmodel.h src/chatmodel.cpp
+    src/ChatModel.h src/ChatModel.cpp
+    src/MessageModel.h src/MessageModel.cpp
 
 
 

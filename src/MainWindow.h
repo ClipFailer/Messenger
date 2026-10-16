@@ -1,18 +1,17 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMap>
-#include <QStringList>
 #include <QWidget>
 
 class QListWidget;
 class QVBoxLayout;
-class QTextEdit;
+class QListView;
 class QLineEdit;
 class QPushButton;
 class QLabel;
 class QListWidgetItem;
 class ChatModel;
+class MessageModel;
 
 class MainWindow : public QWidget {
     Q_OBJECT
@@ -28,13 +27,15 @@ class MainWindow : public QWidget {
     void updateChats();
 
     QLabel      *m_chatTitle    = nullptr;
-    QTextEdit   *m_messagesView = nullptr;
+    QListView   *m_messagesView = nullptr;
     QLineEdit   *m_messageInput = nullptr;
     QPushButton *m_sendButton   = nullptr;
     QListWidget *m_chatList     = nullptr;
 
     ChatModel *m_chatModel = nullptr;
     QString    m_currentChat;
+
+    MessageModel *m_messageModel = nullptr;
 };
 
 #endif // MAINWINDOW_H

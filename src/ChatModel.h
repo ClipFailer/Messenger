@@ -7,9 +7,7 @@
 #include <QStringList>
 
 class ChatModel : public QObject {
-    Q_OBJECT
-  public:
-    explicit ChatModel(QObject *parent = nullptr);
+  Q_OBJECT public : explicit ChatModel(QObject *parent = nullptr);
 
     void addChat(const QString &chatName);
     void addMessage(const QString &chatName, const QString &message);
