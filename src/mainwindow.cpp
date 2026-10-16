@@ -12,6 +12,11 @@ MainWindow::MainWindow(QWidget *parent) : QWidget{parent} {
     setWindowTitle("TelegramClone");
     resize(800, 600);
 
+    // Начальные данные.
+    m_messagesByChat["Анна"] << "Привет!" << "Как дела?";
+    m_messagesByChat["Борис"] << "Созвон в 15:00";
+    m_messagesByChat["Виктор"] << "Файлы отправил";
+
     QSplitter *splitter = new QSplitter(this);
 
     // Левая панель (чаты).
@@ -54,12 +59,16 @@ MainWindow::MainWindow(QWidget *parent) : QWidget{parent} {
 }
 
 void MainWindow::onSendBtnClicked() {
+    if (m_currentChat.isEmpty())
+        return;
+
     QString message = m_messageInput->text().trimmed();
 
     if (message.isEmpty())
         return;
 
     m_messagesView->append(message);
+    m_messagesByChat[m_currentChat].append(message);
     m_messageInput->clear();
 }
 
@@ -68,4 +77,11 @@ void MainWindow::onChatClicked(QListWidgetItem *item, QListWidgetItem * /*previo
         return;
 
     m_chatTitle->setText(item->text());
+    m_currentChat = item->text();
+
+    m_messagesView->clear();
+    const QStringList &messages = m_messagesByChat.value(m_currentChat);
+    for (const QString &msg : messages) {
+        m_messagesView->append(msg);
+    }
 }

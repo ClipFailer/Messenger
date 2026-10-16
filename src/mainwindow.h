@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QMap>
+#include <QStringList>
 #include <QWidget>
 
 class QListWidget;
@@ -26,6 +28,9 @@ class MainWindow : public QWidget {
     QLineEdit   *m_messageInput = nullptr;
     QPushButton *m_sendButton   = nullptr;
     QListWidget *m_chatList     = nullptr;
+
+    QMap<QString, QStringList> m_messagesByChat;
+    QString                    m_currentChat;
 };
 
 #endif // MAINWINDOW_H
