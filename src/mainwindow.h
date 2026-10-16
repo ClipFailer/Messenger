@@ -9,6 +9,7 @@ class QTextEdit;
 class QLineEdit;
 class QPushButton;
 class QLabel;
+class QListWidgetItem;
 
 class MainWindow : public QWidget {
     Q_OBJECT
@@ -17,11 +18,9 @@ class MainWindow : public QWidget {
 
   private slots:
     void onSendBtnClicked();
-    void onChatClicked();
+    void onChatClicked(QListWidgetItem *item, QListWidgetItem *previous);
 
   private:
-    void chatSelectedHandle(const QString &chatTitle);
-
     QLabel      *m_chatTitle    = nullptr;
     QTextEdit   *m_messagesView = nullptr;
     QLineEdit   *m_messageInput = nullptr;

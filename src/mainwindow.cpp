@@ -49,6 +49,8 @@ MainWindow::MainWindow(QWidget *parent) : QWidget{parent} {
     // Бинд кнопки отправить.
     connect(m_sendButton, &QPushButton::clicked, this, &MainWindow::onSendBtnClicked);
     connect(m_messageInput, &QLineEdit::returnPressed, this, &MainWindow::onSendBtnClicked);
+
+    connect(m_chatList, &QListWidget::currentItemChanged, this, &MainWindow::onChatClicked);
 }
 
 void MainWindow::onSendBtnClicked() {
@@ -61,6 +63,9 @@ void MainWindow::onSendBtnClicked() {
     m_messageInput->clear();
 }
 
-void onChatClicked() {}
+void MainWindow::onChatClicked(QListWidgetItem *item, QListWidgetItem * /*previous*/) {
+    if (!item)
+        return;
 
-void MainWindow::chatSelectedHandle(const QString &chatTitle) {}
+    m_chatTitle->setText(item->text());
+}
