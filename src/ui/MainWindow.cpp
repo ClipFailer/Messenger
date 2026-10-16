@@ -1,6 +1,7 @@
 #include "MainWindow.h"
-#include "ChatModel.h"
-#include "MessageModel.h"
+#include "core/ChatModel.h"
+#include "core/MessageModel.h"
+#include "ui/MessageDelegate.h"
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -11,7 +12,7 @@
 #include <QSplitter>
 #include <QVBoxLayout>
 
-MainWindow::MainWindow(QWidget *parent) : QWidget{parent} {
+Messenger::MainWindow::MainWindow(QWidget *parent) : QWidget{parent} {
     // Настройки окна.
     setWindowTitle("TelegramClone");
     resize(800, 600);
@@ -21,9 +22,9 @@ MainWindow::MainWindow(QWidget *parent) : QWidget{parent} {
     m_chatModel->addChat("Ирина");
     m_chatModel->addChat("Витя");
     m_chatModel->addChat("Алексей");
-    m_chatModel->addMessage("Ирина", "Привет!");
-    m_chatModel->addMessage("Витя", "Занят?");
-    m_chatModel->addMessage("Алексей", "Я скоро буду.");
+    m_chatModel->addMessage("Ирина", Messenger::Message("Привет!", false));
+    m_chatModel->addMessage("Витя", Messenger::Message("Занят?", false));
+    m_chatModel->addMessage("Алексей", Messenger::Message("Скоро будешь?", false));
 
     QSplitter *splitter = new QSplitter(this);
 
@@ -41,6 +42,10 @@ MainWindow::MainWindow(QWidget *parent) : QWidget{parent} {
     m_messagesView = new QListView(chatWidget);
     m_messageModel = new MessageModel(this);
     m_messagesView->setModel(m_messageModel);
+    m_messagesView->setItemDelegate(new MessageDelegate(this));
+    m_messagesView->setSelectionMode(QAbstractItemView::NoSelection);
+    m_messagesView->setFocusPolicy(Qt::NoFocus);
+    m_messagesView->setFrameShape(QFrame::NoFrame);
 
     // Чат - область ввода сообщения.
     m_messageInput                 = new QLineEdit(chatWidget);
@@ -71,21 +76,22 @@ MainWindow::MainWindow(QWidget *parent) : QWidget{parent} {
     connect(m_chatList, &QListWidget::currentItemChanged, this, &MainWindow::onChatClicked);
 }
 
-void MainWindow::onSendBtnClicked() {
+void Messenger::MainWindow::onSendBtnClicked() {
     if (!m_chatModel || m_currentChat.isEmpty())
         return;
 
-    QString message = m_messageInput->text().trimmed();
-
-    if (message.isEmpty())
+    QString messageText = m_messageInput->text().trimmed();
+    if (messageText.isEmpty())
         return;
+
+    const Messenger::Message message(messageText);
 
     m_messageModel->addMessage(message);
     m_chatModel->addMessage(m_currentChat, message);
     m_messageInput->clear();
 }
 
-void MainWindow::onChatClicked(QListWidgetItem *item, QListWidgetItem * /*previous*/) {
+void Messenger::MainWindow::onChatClicked(QListWidgetItem *item, QListWidgetItem * /*previous*/) {
     if (!m_chatModel || !item)
         return;
 
@@ -94,7 +100,7 @@ void MainWindow::onChatClicked(QListWidgetItem *item, QListWidgetItem * /*previo
     m_messageModel->setMessages(m_chatModel->messages(m_currentChat));
 }
 
-void MainWindow::updateChats() {
+void Messenger::MainWindow::updateChats() {
     m_chatList->clear();
 
     for (const QString &chatName : m_chatModel->chats()) {

@@ -10,6 +10,9 @@ class QLineEdit;
 class QPushButton;
 class QLabel;
 class QListWidgetItem;
+
+namespace Messenger {
+
 class ChatModel;
 class MessageModel;
 
@@ -37,5 +40,6 @@ class MainWindow : public QWidget {
 
     MessageModel *m_messageModel = nullptr;
 };
+} // namespace Messenger
 
 #endif // MAINWINDOW_H
