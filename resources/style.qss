@@ -1,0 +1,16 @@
+QWidget {
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+}
+QLineEdit {
+    border-radius: 8px;
+    padding: 5px;
+    background-color: #2b2d30;
+}
+QPushButton {
+    padding: 8px;
+
+    border: none;
+    border-radius: 8px;
+    background-color: #007aff;
+}
