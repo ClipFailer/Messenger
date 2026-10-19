@@ -41,7 +41,7 @@ void Messenger::MessageDelegate::paint(QPainter *painter, const QStyleOptionView
 
     painter->setPen(Qt::NoPen);
 
-    // Цвет баблац
+    // Цвет бабла
     const QColor bubbleColor = isOutgoing ? QColor("#007aff") : QColor("#e5e5ea");
     painter->setBrush(bubbleColor);
     painter->drawRoundedRect(bubbleRect, 10, 10);

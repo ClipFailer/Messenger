@@ -6,17 +6,24 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
 qt_standard_project_setup()
 
+set(CMAKE_AUTORCC ON)
+
 qt_add_executable(TelegramClone
     WIN32 MACOSX_BUNDLE
+
     src/main.cpp
 
     src/ui/MainWindow.h src/ui/MainWindow.cpp
     src/ui/MessageDelegate.h src/ui/MessageDelegate.cpp
+    src/ui/chatdelegate.h src/ui/chatdelegate.cpp
 
     src/core/ChatModel.h src/core/ChatModel.cpp
     src/core/MessageModel.h src/core/MessageModel.cpp
 
     .clang-format
+
+    resources/resources.qrc
+
 )
 
 target_include_directories(TelegramClone PRIVATE src)

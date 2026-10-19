@@ -2,6 +2,9 @@
 #include "core/ChatModel.h"
 #include "core/MessageModel.h"
 #include "ui/MessageDelegate.h"
+#include "ui/chatdelegate.h"
+#include <QDebug>
+#include <QFile>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -13,24 +16,35 @@
 #include <QVBoxLayout>
 
 Messenger::MainWindow::MainWindow(QWidget *parent) : QWidget{parent} {
+    // Подключение стилей.
+    QFile styleFile(":/style.qss");
+    if (styleFile.open(QFile::ReadOnly)) {
+        QString styleSheet = QString::fromUtf8(styleFile.readAll());
+        setStyleSheet(styleSheet);
+
+        qDebug() << "Styles file has successfully loaded.";
+    } else {
+        qDebug() << "Failed to load styles file.";
+    }
     // Настройки окна.
     setWindowTitle("TelegramClone");
     resize(800, 600);
 
     // Начальные данные.
     m_chatModel = new ChatModel(this);
-    m_chatModel->addChat("Ирина");
-    m_chatModel->addChat("Витя");
-    m_chatModel->addChat("Алексей");
-    m_chatModel->addMessage("Ирина", Messenger::Message("Привет!", false));
-    m_chatModel->addMessage("Витя", Messenger::Message("Занят?", false));
-    m_chatModel->addMessage("Алексей", Messenger::Message("Скоро будешь?", false));
+    m_chatModel->addChat(0, "Ирина");
+    m_chatModel->addChat(1, "Витя");
+    m_chatModel->addChat(2, "Алексей");
+    m_chatModel->addMessage(0, Messenger::Message("Привет!", false));
+    m_chatModel->addMessage(1, Messenger::Message("Занят?", false));
+    m_chatModel->addMessage(2, Messenger::Message("Скоро будешь?", false));
 
     QSplitter *splitter = new QSplitter(this);
 
     // Левая панель - список чатов.
-    m_chatList = new QListWidget();
-    updateChats();
+    m_chatList = new QListView(this);
+    m_chatList->setModel(m_chatModel);
+    m_chatList->setItemDelegate(new ChatDelegate(this));
 
     // Правая панель (чат).
     QWidget     *chatWidget = new QWidget();
@@ -73,11 +87,11 @@ Messenger::MainWindow::MainWindow(QWidget *parent) : QWidget{parent} {
     connect(m_messageInput, &QLineEdit::returnPressed, this, &MainWindow::onSendBtnClicked);
 
     // Бинд смены часта.
-    connect(m_chatList, &QListWidget::currentItemChanged, this, &MainWindow::onChatClicked);
+    connect(m_chatList, &QListView::clicked, this, &MainWindow::onChatClicked);
 }
 
 void Messenger::MainWindow::onSendBtnClicked() {
-    if (!m_chatModel || m_currentChat.isEmpty())
+    if (!m_chatModel || m_currentChatId == -1)
         return;
 
     QString messageText = m_messageInput->text().trimmed();
@@ -87,23 +101,19 @@ void Messenger::MainWindow::onSendBtnClicked() {
     const Messenger::Message message(messageText);
 
     m_messageModel->addMessage(message);
-    m_chatModel->addMessage(m_currentChat, message);
+    m_chatModel->addMessage(m_currentChatId, message);
     m_messageInput->clear();
+
+    m_messagesView->scrollToBottom();
 }
 
-void Messenger::MainWindow::onChatClicked(QListWidgetItem *item, QListWidgetItem * /*previous*/) {
-    if (!m_chatModel || !item)
+void Messenger::MainWindow::onChatClicked(const QModelIndex &index) {
+    if (!m_chatModel)
         return;
 
-    m_chatTitle->setText(item->text());
-    m_currentChat = item->text();
-    m_messageModel->setMessages(m_chatModel->messages(m_currentChat));
-}
+    m_chatTitle->setText(index.data(Qt::DisplayRole).toString());
+    m_currentChatId = index.data(Messenger::ChatRoles::idRole).toInt();
+    m_messageModel->setMessages(m_chatModel->messages(m_currentChatId));
 
-void Messenger::MainWindow::updateChats() {
-    m_chatList->clear();
-
-    for (const QString &chatName : m_chatModel->chats()) {
-        m_chatList->addItem(chatName);
-    }
+    m_messagesView->scrollToBottom();
 }
