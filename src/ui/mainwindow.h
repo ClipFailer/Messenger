@@ -33,6 +33,9 @@ class MainWindow : public QWidget {
     /// Обрабатывает смену чата.
     void onChatClicked(const QModelIndex &index);
 
+    // Обрабатывает нажатие пкм на чат.
+    void onChatContextMenu(const QPoint &pos);
+
   private:
     /// Обновляет список чатов
     void updateChats();

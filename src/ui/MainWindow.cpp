@@ -3,6 +3,7 @@
 #include "core/MessageModel.h"
 #include "ui/MessageDelegate.h"
 #include "ui/chatdelegate.h"
+#include <QAction>
 #include <QDebug>
 #include <QFile>
 #include <QHBoxLayout>
@@ -11,6 +12,7 @@
 #include <QListView>
 #include <QListWidget>
 #include <QListWidgetItem>
+#include <QMenu>
 #include <QPushButton>
 #include <QSplitter>
 #include <QVBoxLayout>
@@ -45,6 +47,9 @@ Messenger::MainWindow::MainWindow(QWidget *parent) : QWidget{parent} {
     m_chatList = new QListView(this);
     m_chatList->setModel(m_chatModel);
     m_chatList->setItemDelegate(new ChatDelegate(this));
+    m_chatList->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_chatList, &QListView::customContextMenuRequested, this,
+            &MainWindow::onChatContextMenu);
 
     // Правая панель (чат).
     QWidget     *chatWidget = new QWidget();
@@ -116,4 +121,27 @@ void Messenger::MainWindow::onChatClicked(const QModelIndex &index) {
     m_messageModel->setMessages(m_chatModel->messages(m_currentChatId));
 
     m_messagesView->scrollToBottom();
+}
+
+void Messenger::MainWindow::onChatContextMenu(const QPoint &pos) {
+    const QModelIndex clickedChatIndex = m_chatList->indexAt(pos);
+
+    if (!clickedChatIndex.isValid())
+        return;
+
+    QMenu    menu(this);
+    QAction *deleteAction = menu.addAction("Удалить чат");
+
+    QAction *selectedAction = menu.exec(m_chatList->mapToGlobal(pos));
+    if (selectedAction == deleteAction) {
+        const int deletecChatId = clickedChatIndex.data(Messenger::ChatRoles::idRole).toInt();
+
+        m_chatModel->deleteChat(clickedChatIndex.row());
+
+        if (deletecChatId == m_currentChatId) {
+            m_messageModel->clear();
+            m_chatTitle->clear();
+            m_currentChatId = -1;
+        }
+    }
 }

@@ -44,6 +44,20 @@ void Messenger::ChatModel::addChat(const int chatId, const QString &chatName) {
     endInsertRows();
 }
 
+void Messenger::ChatModel::deleteChat(const int row) {
+    if (row < 0 || row >= m_chats.size())
+        return;
+
+    const int chatId = m_chats[row].id;
+
+    beginRemoveRows(QModelIndex(), row, row);
+
+    m_chats.remove(row);
+    m_messages.remove(chatId);
+
+    endRemoveRows();
+}
+
 void Messenger::ChatModel::addMessage(const int chatId, const Message &message) {
     m_messages[chatId].append(message);
 }

@@ -56,6 +56,13 @@ class ChatModel : public QAbstractListModel {
     void addChat(const int chatId, const QString &chatName);
 
     /**
+     * @brief Удаляет чат.
+     *
+     * @param row Номер строки в модели
+     */
+    void deleteChat(const int row);
+
+    /**
      * @brief Добавляет сообщение в чат.
      *
      * @param id Идентификатор чата
