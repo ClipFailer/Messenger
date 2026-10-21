@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include "core/ChatModel.h"
+#include "core/DatabaseManager.h"
 #include "core/MessageModel.h"
 #include "ui/MessageDelegate.h"
 #include "ui/chatdelegate.h"
@@ -18,6 +19,9 @@
 #include <QVBoxLayout>
 
 Messenger::MainWindow::MainWindow(QWidget *parent) : QWidget{parent} {
+    // Инициализируем бд.
+    Messenger::DatabaseManager::instance().init();
+
     // Подключение стилей.
     QFile styleFile(":/style.qss");
     if (styleFile.open(QFile::ReadOnly)) {
@@ -32,14 +36,9 @@ Messenger::MainWindow::MainWindow(QWidget *parent) : QWidget{parent} {
     setWindowTitle("TelegramClone");
     resize(800, 600);
 
-    // Начальные данные.
+    // Модель чатов.
     m_chatModel = new ChatModel(this);
-    m_chatModel->addChat(0, "Ирина");
-    m_chatModel->addChat(1, "Витя");
-    m_chatModel->addChat(2, "Алексей");
-    m_chatModel->addMessage(0, Messenger::Message("Привет!", false));
-    m_chatModel->addMessage(1, Messenger::Message("Занят?", false));
-    m_chatModel->addMessage(2, Messenger::Message("Скоро будешь?", false));
+    m_chatModel->loadFromDB();
 
     QSplitter *splitter = new QSplitter(this);
 

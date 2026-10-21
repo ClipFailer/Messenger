@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.19)
 
 project(TelegramClone LANGUAGES CXX)
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Sql)
 
 qt_standard_project_setup()
 
@@ -23,6 +23,8 @@ qt_add_executable(TelegramClone
     .clang-format
 
     resources/resources.qrc
+    src/core/DatabaseManager.h src/core/DatabaseManager.cpp
+
 
 )
 
@@ -31,4 +33,5 @@ target_include_directories(TelegramClone PRIVATE src)
 target_link_libraries(TelegramClone
     PRIVATE
     Qt6::Widgets
+    Qt6::Sql
 )

@@ -1,4 +1,5 @@
 #include "ChatModel.h"
+#include "DatabaseManager.h"
 #include "MessageModel.h"
 
 Messenger::ChatModel::ChatModel(QObject *parent) : QAbstractListModel{parent} {}
@@ -41,6 +42,9 @@ void Messenger::ChatModel::addChat(const int chatId, const QString &chatName) {
     m_chats.append(ChatInfo{chatId, chatName});
     m_messages[chatId] = QList<Message>();
 
+    // Сохраняем в бд.
+    Messenger::DatabaseManager::instance().saveChat(chatId, chatName);
+
     endInsertRows();
 }
 
@@ -55,11 +59,21 @@ void Messenger::ChatModel::deleteChat(const int row) {
     m_chats.remove(row);
     m_messages.remove(chatId);
 
+    // Сохраняем в бд.
+    Messenger::DatabaseManager::instance().removeChat(chatId);
+
     endRemoveRows();
 }
 
 void Messenger::ChatModel::addMessage(const int chatId, const Message &message) {
     m_messages[chatId].append(message);
+
+    // Сохраняем в бд.
+    Messenger::DatabaseManager::instance().saveMessage(chatId, message);
+}
+
+void Messenger::ChatModel::loadFromDB() {
+    Messenger::DatabaseManager::instance().loadChats(m_chats, m_messages);
 }
 
 QList<Messenger::ChatInfo> Messenger::ChatModel::chats() const {

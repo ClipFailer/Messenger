@@ -70,6 +70,8 @@ class ChatModel : public QAbstractListModel {
      */
     void addMessage(const int chatId, const Message &message);
 
+    void loadFromDB();
+
   private:
     QList<ChatInfo>           m_chats;    //< список чатов.
     QMap<int, QList<Message>> m_messages; //< мэп всех сообщений чата по айди.
