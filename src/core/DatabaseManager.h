@@ -1,37 +1,50 @@
 #ifndef DATABASEMANAGER_H
 #define DATABASEMANAGER_H
 
+#include <QList>
+#include <QMap>
 #include <QSqlDatabase>
+#include <QString>
 
 namespace Messenger {
 
-class Message;
+struct Message;
 struct ChatInfo;
 
 /**
- * @brief Класс базы данных мессенджера.
+ * @brief Класс базы данных мессенджера (SQLite).
  *
- * Синглтон класс, описывающий базу данных мессенджера.
- * Подключает бд SQlite, создает таблицы (чаты, сообщения), если они не созданы.
+ * Синглтон для управления локальной БД (чаты, сообщения, закрепления, вложения).
  */
 class DatabaseManager {
   public:
-    /// Создает синглтон, если он еще не создан и возвращает его.
     static DatabaseManager &instance();
 
-    /// Инициализирует бд.
-    bool init();
+    /// Инициализирует БД и обновляет схему при необходимости.
+    bool init(const QString &dbName = "messenger.db");
 
-    /// Сохраняет чат.
-    void saveChat(const int id, const QString &name);
+    /// Сохраняет или обновляет чат.
+    void saveChat(const ChatInfo &chat);
 
-    /// Сохраняет сообещние.
-    void saveMessage(const int chatId, const Message &message);
+    /// Удаляет чат и все его сообщения.
+    void removeChat(int id);
 
-    /// Удаляет чат.
-    void removeChat(const int id);
+    /// Очищает историю сообщений чата.
+    void clearChatMessages(int chatId);
 
-    // Загружает и возвращает все чаты и сообщения.
+    /// Обновляет флаг закрепления чата.
+    void setChatPinned(int id, bool pinned);
+
+    /// Сохраняет сообщение и заполняет присвоенный message.id.
+    void saveMessage(int chatId, Message &message);
+
+    /// Обновляет текст сообщения и флаг редактирования.
+    void updateMessage(int messageId, const QString &newText);
+
+    /// Удаляет конкретное сообщение.
+    void removeMessage(int messageId);
+
+    /// Загружает все чаты и историю сообщений из БД.
     void loadChats(QList<ChatInfo> &outChats, QMap<int, QList<Message>> &outMessages);
 
   private:
@@ -41,8 +54,11 @@ class DatabaseManager {
     DatabaseManager(const DatabaseManager &)            = delete;
     DatabaseManager &operator=(const DatabaseManager &) = delete;
 
+    void seedInitialDataIfEmpty();
+
     QSqlDatabase m_db;
 };
+
 } // namespace Messenger
 
 #endif // DATABASEMANAGER_H

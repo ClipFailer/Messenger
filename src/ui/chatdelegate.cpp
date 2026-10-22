@@ -1,85 +1,176 @@
 #include "chatdelegate.h"
 #include "core/ChatModel.h"
 #include <QPainter>
+#include <QPainterPath>
 
-Messenger::ChatDelegate::ChatDelegate(QObject *parent) : QStyledItemDelegate{parent} {}
+Messenger::ChatDelegate::ChatDelegate(QObject *parent)
+    : QStyledItemDelegate(parent)
+{}
 
 QSize Messenger::ChatDelegate::sizeHint(const QStyleOptionViewItem &option,
-                                        const QModelIndex          &index) const {
+                                        const QModelIndex &index) const {
+    Q_UNUSED(index)
     return QSize(option.rect.width(), ItemHeight);
-};
+}
+
+QColor Messenger::ChatDelegate::colorForName(const QString &name) const {
+    static const QList<QColor> colors = {
+        QColor("#e17076"), // Red
+        QColor("#faa774"), // Orange
+        QColor("#a695e7"), // Violet
+        QColor("#7bc862"), // Green
+        QColor("#6ec9cb"), // Cyan
+        QColor("#65aadd"), // Blue
+        QColor("#ee7aae")  // Pink
+    };
+
+    uint hash = qHash(name);
+    return colors[hash % colors.size()];
+}
 
 void Messenger::ChatDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                                     const QModelIndex &index) const {
-
-    // Подготавливаем painter.
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing);
+    painter->setRenderHint(QPainter::TextAntialiasing);
 
-    // Получаем данные из модели.
     const QString chatTitle   = index.data(Qt::DisplayRole).toString();
     const QString lastMessage = index.data(Messenger::ChatRoles::LastMessageRole).toString();
+    const QString lastTime    = index.data(Messenger::ChatRoles::LastTimeRole).toString();
+    const bool    isPinned    = index.data(Messenger::ChatRoles::IsPinnedRole).toBool();
+    const QString chatType    = index.data(Messenger::ChatRoles::ChatTypeRole).toString();
+    const int     unreadCount = index.data(Messenger::ChatRoles::UnreadCountRole).toInt();
+    const QString customColor = index.data(Messenger::ChatRoles::AvatarColorRole).toString();
 
-    // Выбираем заливку фона.
-    if (option.state & QStyle::State_Selected)
-        painter->fillRect(option.rect, ItemSelectedColor);
-    else if (option.state & QStyle::State_MouseOver)
-        painter->fillRect(option.rect, ItemHoverColor);
+    const bool isSelected = (option.state & QStyle::State_Selected);
+    const bool isHovered  = (option.state & QStyle::State_MouseOver);
 
-    // Аватарка.
+    // Фоновая заливка элемента
+    QColor bgColor = QColor("#17212b");
+    if (isSelected) {
+        bgColor = QColor("#2b5278");
+    } else if (isHovered) {
+        bgColor = QColor("#202b36");
+    }
+    painter->fillRect(option.rect, bgColor);
 
+    // Отрисовка круглого аватара
     const QRect avatarRect(option.rect.left() + AvatarMargin,
-                           option.rect.top() + (ItemHeight - AvatarSize) / 2, AvatarSize,
-                           AvatarSize);
+                           option.rect.top() + (ItemHeight - AvatarSize) / 2,
+                           AvatarSize, AvatarSize);
 
-    // Рисуем аватар.
+    QColor avatarBg = customColor.isEmpty() ? colorForName(chatTitle) : QColor(customColor);
+    if (chatType == "saved" || chatTitle == "Избранное") {
+        avatarBg = QColor("#2AABEE");
+    }
+
     painter->setPen(Qt::NoPen);
-    painter->setBrush(AvatarColor);
+    painter->setBrush(avatarBg);
     painter->drawEllipse(avatarRect);
 
-    // Рисуем первую букву имени по цетру аватара.
-    painter->setPen(AvatarInitilaColor);
-    QFont font = painter->font();
-    font.setBold(true);
-    font.setPointSize(AvatarInitialFontSize);
-    painter->setFont(font);
+    // Содержимое аватара (символ или иконка)
+    painter->setPen(Qt::white);
+    QFont avatarFont = painter->font();
+    avatarFont.setBold(true);
 
-    const QString initial = chatTitle.left(1).toUpper();
-    painter->drawText(avatarRect, Qt::AlignCenter, initial);
+    if (chatType == "saved" || chatTitle == "Избранное") {
+        avatarFont.setPointSize(16);
+        painter->setFont(avatarFont);
+        painter->drawText(avatarRect, Qt::AlignCenter, "🔖");
+    } else if (chatType == "bot") {
+        avatarFont.setPointSize(16);
+        painter->setFont(avatarFont);
+        painter->drawText(avatarRect, Qt::AlignCenter, "🤖");
+    } else {
+        avatarFont.setPointSize(13);
+        painter->setFont(avatarFont);
+        const QString initial = chatTitle.isEmpty() ? "?" : chatTitle.left(1).toUpper();
+        painter->drawText(avatarRect, Qt::AlignCenter, initial);
+    }
 
-    // Имя чата.
+    // Текстовая область
+    const int textLeft = option.rect.left() + AvatarMargin * 2 + AvatarSize;
+    const int rightMargin = 12;
+    const int availableWidth = option.rect.right() - textLeft - rightMargin;
 
-    const int totalTextHeight = NameHeight + MsgTopMargin + MsgHeight;
-    const int textStartY      = option.rect.top() + (ItemHeight - totalTextHeight) / 2;
-    const int textLeft        = option.rect.left() + AvatarMargin * 2 + AvatarSize;
-    const int textWidth       = option.rect.width() - textLeft - AvatarMargin;
+    // Правая часть: время и значок закрепления
+    int rightIconsWidth = 0;
+    QFont timeFont = painter->font();
+    timeFont.setPointSize(9);
+    painter->setFont(timeFont);
+    const int timeTextWidth = painter->fontMetrics().horizontalAdvance(lastTime);
 
-    const QRect nameRect(textLeft, textStartY, textWidth, NameHeight);
+    if (!lastTime.isEmpty()) {
+        rightIconsWidth += timeTextWidth + 6;
+    }
+    if (isPinned) {
+        rightIconsWidth += 18;
+    }
 
-    painter->setPen(NameFontColor);
-    QFont nameFont = painter->font();
-    nameFont.setBold(true);
-    nameFont.setPointSize(NameFontSize);
-    painter->setFont(nameFont);
+    // Заголовок чата
+    const int titleWidth = availableWidth - rightIconsWidth;
+    const QRect titleRect(textLeft, option.rect.top() + 14, titleWidth, 20);
 
-    // Отрисовываем название чата.
-    painter->drawText(nameRect, Qt::AlignLeft | Qt::AlignVCenter, chatTitle);
+    QFont titleFont = painter->font();
+    titleFont.setBold(true);
+    titleFont.setPointSize(10);
+    painter->setFont(titleFont);
+    painter->setPen(Qt::white);
 
-    // Последнее сообщение чата.
+    const QString elidedTitle = painter->fontMetrics().elidedText(chatTitle, Qt::ElideRight, titleWidth);
+    painter->drawText(titleRect, Qt::AlignLeft | Qt::AlignVCenter, elidedTitle);
 
-    const QRect msgRect(textLeft, textStartY + NameHeight + MsgTopMargin, textWidth, MsgHeight);
+    // Отрисовка времени
+    if (!lastTime.isEmpty()) {
+        painter->setFont(timeFont);
+        painter->setPen(isSelected ? QColor("#c1d8ee") : QColor("#7f91a4"));
+        const QRect timeRect(option.rect.right() - rightMargin - timeTextWidth,
+                             option.rect.top() + 14, timeTextWidth, 20);
+        painter->drawText(timeRect, Qt::AlignRight | Qt::AlignVCenter, lastTime);
+    }
 
-    painter->setPen(MsgColor);
+    // Вторая строка: последнее сообщение и счетчик непрочитанных / булавка
+    const int bottomY = option.rect.top() + 38;
+    int badgeWidth = 0;
+    if (unreadCount > 0) {
+        badgeWidth = 24;
+    } else if (isPinned) {
+        badgeWidth = 20;
+    }
+
+    const int msgWidth = availableWidth - badgeWidth - 4;
+    const QRect msgRect(textLeft, bottomY, msgWidth, 20);
+
     QFont msgFont = painter->font();
-    msgFont.setPointSize(MsgFontSize);
+    msgFont.setPointSize(9);
     painter->setFont(msgFont);
+    painter->setPen(isSelected ? QColor("#dfe8f2") : QColor("#7f91a4"));
 
-    // Обрезаем текст, если не влезает.
-    const QString elidedMsg =
-        painter->fontMetrics().elidedText(lastMessage, Qt::ElideRight, textWidth);
-
-    // Отрисовываем сообщение.
+    const QString elidedMsg = painter->fontMetrics().elidedText(lastMessage, Qt::ElideRight, msgWidth);
     painter->drawText(msgRect, Qt::AlignLeft | Qt::AlignVCenter, elidedMsg);
 
+    // Отрисовка бейджа непрочитанных или значка закрепления
+    if (unreadCount > 0) {
+        const int badgeH = 18;
+        const int badgeW = qMax(20, painter->fontMetrics().horizontalAdvance(QString::number(unreadCount)) + 10);
+        const QRect badgeRect(option.rect.right() - rightMargin - badgeW, bottomY + 1, badgeW, badgeH);
+
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(QColor("#4fae63"));
+        painter->drawRoundedRect(badgeRect, badgeH / 2, badgeH / 2);
+
+        painter->setPen(Qt::white);
+        QFont badgeFont = painter->font();
+        badgeFont.setBold(true);
+        badgeFont.setPointSize(8);
+        painter->setFont(badgeFont);
+        painter->drawText(badgeRect, Qt::AlignCenter, QString::number(unreadCount));
+    } else if (isPinned) {
+        const QRect pinRect(option.rect.right() - rightMargin - 18, bottomY + 1, 18, 18);
+        painter->setPen(isSelected ? QColor("#c1d8ee") : QColor("#7f91a4"));
+        painter->setFont(timeFont);
+        painter->drawText(pinRect, Qt::AlignCenter, "📌");
+    }
+
     painter->restore();
-};
+}

@@ -1,16 +1,235 @@
-QWidget {
-    background-color: #1e1e1e;
-    color: #d4d4d4;
-}
-QLineEdit {
-    border-radius: 8px;
-    padding: 5px;
-    background-color: #2b2d30;
-}
-QPushButton {
-    padding: 8px;
+/* ==========================================================
+   Telegram Desktop Dark Theme Stylesheet
+   ========================================================== */
 
+QWidget {
+    color: #f5f5f5;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 13px;
+    selection-background-color: #2b5278;
+    selection-color: #ffffff;
+}
+
+/* Фоновые панели */
+QWidget#mainWindow, QWidget#rightPanel, QListView#messagesView {
+    background-color: #0e1621;
+}
+
+QWidget#leftPanel, QListView#chatListView {
+    background-color: #17212b;
+}
+
+QWidget#leftHeader {
+    background-color: #17212b;
+    border-bottom: 1px solid #101921;
+}
+
+QWidget#chatHeader {
+    background-color: #17212b;
+    border-bottom: 1px solid #101921;
+}
+
+QWidget#inChatSearchWidget {
+    background-color: #17212b;
+    border-bottom: 1px solid #101921;
+}
+
+QWidget#actionBanner {
+    background-color: #17212b;
+    border-top: 1px solid #242f3d;
+}
+
+QWidget#inputBar {
+    background-color: #17212b;
+    border-top: 1px solid #101921;
+}
+
+/* Прозрачные контейнеры внутри шапки и баннеров (убираем темные квадраты) */
+QWidget#titlesWidget, QWidget#bannerTextWidget, QLabel {
+    background-color: transparent;
+}
+
+/* Сплиттер */
+QSplitter::handle {
+    background-color: #101921;
+}
+
+/* Списки */
+QListView {
     border: none;
+    outline: none;
+}
+
+/* Поля ввода */
+QLineEdit#searchEdit {
+    background-color: #242f3d;
+    color: #f5f5f5;
+    border: 1px solid #242f3d;
+    border-radius: 16px;
+    padding: 6px 12px;
+    font-size: 13px;
+}
+QLineEdit#searchEdit:focus {
+    border: 1px solid #5494d4;
+    background-color: #17212b;
+}
+
+QLineEdit#messageInput {
+    background-color: #242f3d;
+    color: #f5f5f5;
+    border: 1px solid #242f3d;
+    border-radius: 18px;
+    padding: 8px 14px;
+    font-size: 14px;
+}
+QLineEdit#messageInput:focus {
+    border: 1px solid #5494d4;
+    background-color: #1c2733;
+}
+
+QLineEdit {
+    background-color: #242f3d;
+    color: #f5f5f5;
+    border: 1px solid #242f3d;
     border-radius: 8px;
-    background-color: #007aff;
+    padding: 8px 10px;
+}
+QLineEdit:focus {
+    border: 1px solid #5494d4;
+}
+
+/* --- Кнопки с иконками (без padding, чтобы иконки не обрезались!) --- */
+QPushButton#sendButton {
+    background-color: #2b5278;
+    color: #ffffff;
+    border: none;
+    border-radius: 19px;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 0px;
+    min-width: 38px;
+    max-width: 38px;
+    min-height: 38px;
+    max-height: 38px;
+}
+QPushButton#sendButton:hover {
+    background-color: #356494;
+}
+QPushButton#sendButton:pressed {
+    background-color: #213f5c;
+}
+
+QPushButton#menuBtn, QPushButton#newChatBtn, QPushButton#iconButton {
+    background-color: transparent;
+    color: #7f91a4;
+    border: none;
+    border-radius: 18px;
+    font-size: 16px;
+    padding: 0px;
+    min-width: 36px;
+    max-width: 36px;
+    min-height: 36px;
+    max-height: 36px;
+}
+QPushButton#menuBtn:hover, QPushButton#newChatBtn:hover, QPushButton#iconButton:hover {
+    background-color: #242f3d;
+    color: #f5f5f5;
+}
+QPushButton#menuBtn:pressed, QPushButton#newChatBtn:pressed, QPushButton#iconButton:pressed {
+    background-color: #1c2733;
+}
+
+/* Обычные текстовые кнопки диалогов */
+QPushButton {
+    background-color: #2b5278;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-weight: 500;
+}
+QPushButton:hover {
+    background-color: #356494;
+}
+QPushButton:pressed {
+    background-color: #213f5c;
+}
+
+/* Заголовки */
+QLabel#chatTitleLabel {
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 14px;
+    background-color: transparent;
+}
+
+QLabel#chatSubtitleLabel {
+    color: #7f91a4;
+    font-size: 12px;
+    background-color: transparent;
+}
+
+/* Меню */
+QMenu {
+    background-color: #17212b;
+    border: 1px solid #242f3d;
+    border-radius: 8px;
+    padding: 4px;
+}
+QMenu::item {
+    padding: 6px 20px;
+    border-radius: 4px;
+    color: #f5f5f5;
+}
+QMenu::item:selected {
+    background-color: #2b5278;
+    color: #ffffff;
+}
+QMenu::separator {
+    height: 1px;
+    background-color: #242f3d;
+    margin: 4px 8px;
+}
+
+/* Диалоги */
+QDialog {
+    background-color: #17212b;
+    color: #f5f5f5;
+}
+
+QComboBox {
+    background-color: #242f3d;
+    color: #f5f5f5;
+    border: 1px solid #242f3d;
+    border-radius: 6px;
+    padding: 6px 10px;
+}
+QComboBox QAbstractItemView {
+    background-color: #17212b;
+    color: #f5f5f5;
+    selection-background-color: #2b5278;
+    selection-color: #ffffff;
+    border: 1px solid #242f3d;
+}
+
+/* Тонкие скроллбары Telegram */
+QScrollBar:vertical {
+    border: none;
+    background-color: transparent;
+    width: 6px;
+    margin: 0px;
+}
+QScrollBar::handle:vertical {
+    background-color: #2b394a;
+    min-height: 24px;
+    border-radius: 3px;
+}
+QScrollBar::handle:vertical:hover {
+    background-color: #435871;
+}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical,
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    border: none;
+    background: none;
+    height: 0px;
 }
